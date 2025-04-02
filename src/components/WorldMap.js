@@ -11,6 +11,13 @@ import "react-tooltip/dist/react-tooltip.css";
 // World map topojson data - using local file instead of external URL
 const geoUrl = "/data/topojson/world-countries.json";
 
+// Helper function to generate Wikipedia URL
+const getWikipediaUrl = (animalName) => {
+  // Replace spaces with underscores for Wikipedia URL format
+  const formattedName = animalName.replace(/ /g, '_');
+  return `https://en.wikipedia.org/wiki/${formattedName}`;
+};
+
 const WorldMap = ({ deadlyWildlifeData }) => {
   const [tooltipContent, setTooltipContent] = useState("");
   const [activeRegion, setActiveRegion] = useState(null);
@@ -53,9 +60,14 @@ const WorldMap = ({ deadlyWildlifeData }) => {
     const regionData = findRegionData(geo);
     
     if (regionData) {
+      // Create a brief summary of deadly wildlife with Wikipedia links
+      const animalLinks = regionData.deadliest_animals.map(animal => 
+        `<a href="${getWikipediaUrl(animal.name)}" target="_blank" rel="noopener noreferrer">${animal.name}</a>`
+      ).join(", ");
+      
       setTooltipContent(`
         <h3>${regionData.name}</h3>
-        <p>Click for details about deadly wildlife in this region</p>
+        <p><strong>Deadly wildlife:</strong> ${animalLinks}</p>
       `);
     } else {
       setTooltipContent(`
@@ -130,7 +142,11 @@ const WorldMap = ({ deadlyWildlifeData }) => {
           <ul>
             {activeRegion.deadliest_animals.map((animal, index) => (
               <li key={index}>
-                <h4>{animal.name}</h4>
+                <h4>
+                  <a href={getWikipediaUrl(animal.name)} target="_blank" rel="noopener noreferrer">
+                    {animal.name}
+                  </a>
+                </h4>
                 <p><strong>Danger Type:</strong> {animal.danger_type}</p>
                 <p>{animal.description}</p>
               </li>
